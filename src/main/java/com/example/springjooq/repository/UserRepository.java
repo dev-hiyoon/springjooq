@@ -1,5 +1,6 @@
 package com.example.springjooq.repository;
 
+import com.example.springjooq.entity.UserEntity;
 import com.example.springjooq.entity.jooq.tables.User;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -13,8 +14,8 @@ public class UserRepository {
 
     private final DSLContext dslContext;
 
-    public List<User> getUsers() {
-        return dslContext.selectFrom(User.USER).fetchInto(User.class);
+    public List<UserEntity> getUsers() {
+        return dslContext.selectFrom(User.USER).fetchInto(UserEntity.class);
     }
 
 }

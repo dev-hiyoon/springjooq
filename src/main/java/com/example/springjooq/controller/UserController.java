@@ -1,6 +1,6 @@
 package com.example.springjooq.controller;
 
-import com.example.springjooq.entity.jooq.tables.User;
+import com.example.springjooq.entity.UserEntity;
 import com.example.springjooq.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping()
-    public List<User> getUsers() {
+    public List<UserEntity> getUsers() {
         return userRepository.getUsers();
     }
 
