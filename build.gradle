@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.4'
     id 'io.spring.dependency-management' version '1.1.3'
+    id 'nu.studer.jooq' version '8.2.1'
 }
 
 group = 'com.example'
@@ -28,8 +29,62 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-jooq'
+
+    jooqGenerator('com.mysql:mysql-connector-j')
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jooq {
+//    version = '3.15.1'  // default (can be omitted)
+//    edition = nu.studer.gradle.jooq.JooqEdition.OSS  // default (can be omitted)
+    configurations {
+        main {  // name of the jOOQ configuration
+//            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+            generationTool {
+                logging = 'INFO' // TRACE, DEBUG, INFO, WARN, ERROR, FATAL
+                onError = 'LOG'  // FAIL, LOG, SILENT
+                jdbc {
+                    driver = 'com.mysql.cj.jdbc.Driver'
+                    url = 'jdbc:mysql://localhost:3306/test_db'
+                    user = 'root'
+                    password = 'root'
+                    properties {
+                        property {
+                            key = 'ssl'
+                            value = 'true'
+                        }
+                    }
+                }
+
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    strategy {
+                        // org.jooq.codegen.KeepNamesGeneratorStrategy - DB 네이밍 유지: 언더바, 대소문자 등... 기본값은 PascalCaseNames
+                        name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                    }
+                    database {
+                        // https://www.jooq.org/doc/3.15/manual/code-generation/codegen-advanced/codegen-config-database/codegen-database-name/
+                        name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        inputSchema = 'test_db'
+                    }
+//                    generate {
+//                        deprecated = false
+//                        records = true
+//                        immutablePojos = true
+//                        fluentSetters = true
+//                    }
+                    target {
+                        packageName = 'com.example.springjooq.entity.jooq'
+//                        directory = 'target/generated-sources/jooq'  // default (can be omitted)
+//                        directory = 'src/main/java'
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
 }
