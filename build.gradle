@@ -35,18 +35,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     jooqGenerator('com.mysql:mysql-connector-j')
+    jooqGenerator('org.jooq:jooq-meta-extensions-hibernate')
+    jooqGenerator('org.springframework.boot:spring-boot-starter-data-jpa')
+    jooqGenerator('org.jooq:jooq-meta-extensions')
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
 
+// 1. database
 jooq {
-//    version = '3.15.1'  // default (can be omitted)
-//    edition = nu.studer.gradle.jooq.JooqEdition.OSS  // default (can be omitted)
     configurations {
-        main {  // name of the jOOQ configuration
-//            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+        main {
             generationTool {
                 logging = 'INFO' // TRACE, DEBUG, INFO, WARN, ERROR, FATAL
                 onError = 'LOG'  // FAIL, LOG, SILENT
@@ -55,39 +56,13 @@ jooq {
                     url = 'jdbc:mysql://localhost:3306/test_db'
                     user = 'root'
                     password = 'root'
-                    properties {
-                        property {
-                            key = 'ssl'
-                            value = 'true'
-                        }
-                    }
+//                    properties {
+//                        property {
+//                            key = 'ssl'
+//                            value = 'true'
+//                        }
+//                    }
                 }
-
-//                generator {
-//                    name = 'org.jooq.codegen.DefaultGenerator'
-//                    strategy {
-//                        // org.jooq.codegen.KeepNamesGeneratorStrategy - DB 네이밍 유지: 언더바, 대소문자 등... 기본값은 PascalCaseNames
-//                        name = 'org.jooq.codegen.DefaultGeneratorStrategy'
-//                    }
-//                    database {
-//                        // https://www.jooq.org/doc/3.15/manual/code-generation/codegen-advanced/codegen-config-database/codegen-database-name/
-//                        name = 'org.jooq.meta.mysql.MySQLDatabase'
-//                        inputSchema = 'test_db'
-//                    }
-////                    generate {
-////                        deprecated = false
-////                        records = true
-////                        immutablePojos = true
-////                        fluentSetters = true
-////                    }
-//                    target {
-//                        packageName = 'com.example.springjooq.entity.jooq'
-////                        directory = 'target/generated-sources/jooq'  // default (can be omitted)
-//                        directory = 'src/main/java/jooq'
-//                    }
-//                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
-//                }
-
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
@@ -105,3 +80,103 @@ jooq {
         }
     }
 }
+
+// 2 entity - entity를 별도의 프로젝트/패키지로 구성해야한다. entity를 찾을 수 없다고 나오는 건 그 때문... --;
+//jooq {
+//    configurations {
+//        main {
+//            generateSchemaSourceOnCompilation = false
+//            generationTool {
+//                logging = org.jooq.meta.jaxb.Logging.WARN
+//                generator {
+//                    database {
+//                        name = 'org.jooq.meta.extensions.jpa.JPADatabase'
+//                        inputCatalog = 'a'
+//                        inputSchema = 'test_db'
+//                        properties {
+//                            property {
+//                                key = 'packages'
+//                                value = 'com.example.springjooq.entity'
+//                            }
+//                            property {
+//                                key = 'useAttributeConverters'
+//                                value = true
+//                            }
+//                        }
+//                    }
+//                    target {
+//                        packageName = 'com.example.db.jooq'
+//                        directory = 'build/generated/sources/jooq/java/main'
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
+
+// 3. entity - entity를 별도의 프로젝트/패키지로 구성해야한다. entity를 찾을 수 없다고 나오는 건 그 때문... --;
+//import org.jooq.codegen.GenerationTool
+//import org.jooq.meta.jaxb.Configuration
+//import org.jooq.meta.jaxb.Database
+//import org.jooq.meta.jaxb.Generator
+//import org.jooq.meta.jaxb.Property
+//
+//GenerationTool.generate(new Configuration()
+//        .withGenerator(new Generator()
+//                .withDatabase(new Database()
+//                        .withName("org.jooq.meta.extensions.jpa.JPADatabase")
+//                        .withProperties(
+//                                // A comma separated list of Java packages, that contain your entities
+//                                new Property()
+//                                        .withKey("packages")
+//                                        .withValue("com.example.springjooq.entity"),
+//                                new Property()
+//                                        .withKey("useAttributeConverters")
+//                                        .withValue("true"),
+//                                new Property()
+//                                        .withKey("unqualifiedSchema")
+//                                        .withValue("none")
+//                        ))))
+
+
+// 4. entity
+//import org.jooq.codegen.GenerationTool
+//import org.jooq.meta.jaxb.*
+//
+//task generateCode() {
+//    GenerationTool.generate(new org.jooq.meta.jaxb.Configuration()
+//            .withGenerator(new Generator()
+//                    .withDatabase(new Database()
+//                            .withName("org.jooq.meta.extensions.jpa.JPADatabase")
+////                            .withIncludes(".*")
+//                            .withProperties(
+//
+//                                    // A comma separated list of Java packages, that contain your entities
+//                                    new Property()
+//                                            .withKey("packages")
+//                                            .withValue("com.example.springjooq.entity"),
+//
+//                                    // Whether JPA 2.1 AttributeConverters should be auto-mapped to jOOQ Converters.
+//                                    // Custom <forcedType/> configurations will have a higher priority than these auto-mapped converters.
+//                                    // This defaults to true.
+//                                    new Property()
+//                                            .withKey("useAttributeConverters")
+//                                            .withValue("true"),
+//
+//                                    // The default schema for unqualified objects:
+//                                    //
+//                                    // - public: all unqualified objects are located in the PUBLIC (upper case) schema
+//                                    // - none: all unqualified objects are located in the default schema (default)
+//                                    //
+//                                    // This configuration can be overridden with the schema mapping feature
+//                                    new Property()
+//                                            .withKey("unqualifiedSchema")
+//                                            .withValue("none")
+//                            )
+//                    )
+//                    .withTarget(new Target()
+//                            .withPackageName(projectDir.toString() + "jooq.generated.example")
+//                            .withDirectory("src/main/java")
+//                    )))
+//}
